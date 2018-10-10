@@ -50,12 +50,11 @@ colnames(d)
 And see if you can figure out what range the likert scores are in. What's the highest number on the likert scale, and what's the lowest? (Hint, `d$Game1Angry1` is one of the likert rating columns, and you may want to use `unique` or `range` or `hist`)
 
 ```{r}
-## your code here
-
+hist(d$Game1Angry1)
 ```
 
-Highest number: [Your answer here]
-Lowest number: [Your answer here]
+Highest number: [7]
+Lowest number: [1]
 
 # cleaning up a bit
 
@@ -81,7 +80,7 @@ The researchers have made a column called `DoNotUse` based on their exlusion cri
 
 ```{r}
 filtered_d = d %>% 
-  filter(   ) # your code here: exclude subjects that are marked as "DoNotUse"
+  filter(is.na(DoNotUse)) # your code here: exclude subjects that are marked as "DoNotUse"
 ```
 
 It's good practice to assign a new variable name (in this case `filtered_d`) to a data frame when you change it in an important way, or apply a code chunk that shouldn't be run twice. This helps prevent you seeing different results when you run your code in chunks (and might run one multiple times, or skip it, etc.) vs. knit the document.
