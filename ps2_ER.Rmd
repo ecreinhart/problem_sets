@@ -117,7 +117,7 @@ Now you try! Fill in the selection criteria to get rid of the "Game" columns, wh
 
 ```{r}
 performance_hyp_d = filtered_d %>% 
-  select( ) # your code here: remove the columns containing "Game" in the name
+  select(-contains("Game") ) # your code here: remove the columns containing "Game" in the name
 ```
 
 # Converting to long form
@@ -152,7 +152,7 @@ And you can convert the rating dataset! (Call the "Key" column "Measurement" and
 
 ```{r}
 rating_hyp_long_d = rating_hyp_d %>%
-  ## your code here
+  gather(Measurement, Rating, -c("Subject", "Cond"))
 ```
 
 # Splitting columns
@@ -171,8 +171,7 @@ Now you can help! For the rating dataset, write a test on a measurement name, us
 
 ```{r}
 rating_hyp_long_d = rating_hyp_long_d %>%
-  mutate(
-    IsRecall = ,## Your code here
+  mutate(IsRecall = grepl("Friends|Strangers", Measurement)
   )
 ```
 
@@ -220,7 +219,9 @@ The rating hypothesis analysis also requires some grouped manipulation: the expe
 
 ```{r}
 rating_summary_d = rating_hyp_long_d %>% 
-  ## your code here
+  group_by(ConfrontationalGame, Emotion) %>%
+  summarize(MeanRating = mean(Rating, na.rm=T))
+  
 ```
 
 Let's take a look at the result:
@@ -272,7 +273,8 @@ Now we're finally to reproduce Fig. 2 from Tamir et al., we just need to get the
 
 ```{r}
 performance_diff_summary_d = performance_diff_d %>%
-  ## Your code here
+  group_by(ConfrontationalGame, MusicCondition) %>%
+  summarize(MeanImprovementScore = mean(ImprovementScore, na.rm=T))
 ```
 
 Let's take a look at your result (if it has `NA` values, how can you fix it?):
