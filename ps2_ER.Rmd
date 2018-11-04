@@ -1,7 +1,7 @@
 ---
 title: "Psych 251 PS2: Tidying Data"
-author: "Andrew Lampinen"
-date: "September 27, 2018"
+author: "Andrew Lampinen; Completed by Ellen Reinhart"
+date: "September 27, 2018; Submitted October 12, 2018"
 output:
   html_document:
     toc: true
