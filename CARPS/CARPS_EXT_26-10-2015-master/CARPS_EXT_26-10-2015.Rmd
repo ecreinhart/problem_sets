@@ -85,6 +85,10 @@ library(haven) # import and export 'SPSS', 'Stata' and 'SAS' Files
 library(readxl) # import excel files
 library(CARPSreports) # custom report functions
 library(foreign) #read SPSS file 
+char = as.character
+num = function(x) {return (as.numeric(char(x)))}
+library(psycho) #may not be needed
+
 ```
 
 [PILOT/COPILOT DO NOT MAKE CHANGES TO THE CODE CHUNK BELOW]
@@ -98,11 +102,16 @@ reportObject <- data.frame(dummyRow = TRUE, reportedValue = NA, obtainedValue = 
 
 ```{r}
 df = read_spss("../CARPS_EXT_26-10-2015-master/data/Infectious_Cognition-Dataset_for_public_upload.sav")
+#460 participants in dataset, which signals exclusions have arleady been made 
 ```
 
 # Step 3: Tidy data
 
 ```{r}
+df = df %>% 
+  gather("recall_type", "recall_proportion", `RPplus#Recall`, `RPminus#Recall`, `NRP#Recall`) %>% 
+  mutate(recall_proportion = num(recall_proportion)) %>% 
+  separate (recall_type, c("recall_type",NA), sep = "#", remove = TRUE)
 ```
 
 # Step 4: Run analysis
@@ -122,6 +131,7 @@ df = read_spss("../CARPS_EXT_26-10-2015-master/data/Infectious_Cognition-Dataset
 ## Inferential statistics
 
 ```{r}
+summary(df_aov <- aov(recall_proportion ~ RISKCONDITION + recall_type + RISKCONDITION*recall_type + Error(`PARTICIPANT#ID`/RISKCONDITION), data = df))
 ```
 
 # Step 5: Conclusion
