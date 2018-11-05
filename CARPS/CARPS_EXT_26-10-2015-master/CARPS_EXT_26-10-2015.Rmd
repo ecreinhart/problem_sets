@@ -6,11 +6,7 @@ output:
     toc_float: true
 ---
 
-[PILOT/COPILOT - TEXT IN SQUARE BRACKETS IS HERE FOR GUIDANCE. COPILOT PLEASE DELETE BEFORE KNITTING THE FINAL REPORT]
-
 # Report Details
-
-[PILOT/COPILOT ENTER RELEVANT REPORT DETAILS HERE]
 
 ```{r}
 articleID <- "26-10-2015" # insert the article ID code here e.g., "10-3-2015_PS"
@@ -28,7 +24,7 @@ completionDate <- NA # copilot insert the date of final report completion (after
 
 #### Methods summary: 
 
-[PILOT/COPILOT write a brief summary of the methods underlying the target outcomes written in your own words]
+Participants completed a brief knowledge quiz on meningococcal disease. They then read 16 category-exemplary statements from four categories (risk factors, symptioms, test and diagnosis, and after effects). After, participants were randomly assigned to read either a high-threat or low-threat message about the disease and then compelted a manipulation check. Next, participants listened to an audio clip in the "retrieval-practice phase." During this phase, participants were randomly assigned to 1 of 8 conditions that counterbalanced such that the audio clip mentioned 2 facts from 2 categories and did not mention the other 2 facts in each of those categories nor any facts from the other two categories. After completing a distractor questionnaire, participants compelted the cued-recall task. During this task, participants were presented with the titles of the categories and ask to record every fact they could remember. A rater coded the opended responses for accuracy. 
 
 ------
 
@@ -68,8 +64,6 @@ low-risk (M = .15, SD = .30) conditions, t(458) = 0.33, p =
 
 ------
 
-[PILOT/COPILOT DO NOT CHANGE THE CODE IN THE CHUNK BELOW]  
-
 ```{r global_options, include=FALSE}
 # sets up some formatting options for the R Markdown document
 knitr::opts_chunk$set(echo=TRUE, warning=FALSE, message=FALSE)
@@ -87,12 +81,10 @@ library(CARPSreports) # custom report functions
 library(foreign) #read SPSS file 
 char = as.character
 num = function(x) {return (as.numeric(char(x)))}
-library(psycho) #may not be needed
-library(sjstats)
+#library(psycho) 
+#library(sjstats)
 library(effsize)
 ```
-
-[PILOT/COPILOT DO NOT MAKE CHANGES TO THE CODE CHUNK BELOW]
 
 ```{r}
 # Prepare report object. This will be updated automatically by the reproCheck function each time values are compared
@@ -132,13 +124,12 @@ df_subset = df %>%
   filter(recall_type %in% c("NRP","RPplus"))
 
 #repeated measures mixed (between and within) ANOVA
-summary(df_aov <- aov(recall_proportion ~ RISKCONDITION*recall_type + Error(`PARTICIPANT#ID`/recall_type) + recall_type, data=df_subset))
+summary(df_aov <- aov(recall_proportion ~ RISKCONDITION*recall_type + Error(`PARTICIPANT#ID`/recall_type), data=df_subset))
 
-#boxplot(recall_proportion ~ RISKCONDITION*recall_type,data=df_subset) #boxplot to visualize the data
-
-#eta squared calculations 
-eta_sq(df_aov_3)
+#eta squared  
+eta_sq(df_aov)
 ```
+
 "In exploring the main effect for retrieval type, we found a significant difference between recall of Rp+ items (M = .66, SD = .31) and recall of Nrp items (M = .52, SD = .25) in the low-risk condition, t(226) = 7.54, p < .001, d = 0.50, 95% CI for the difference between retrieval types = [.11, .19]."
 
 ```{r}
@@ -212,7 +203,14 @@ sd(df_subset_low$`Practice#effect`)
 
 
 ```{r}
-#graphs
+#chart
+df_fig1 = df %>% 
+  select(`PARTICIPANT#ID`, RISKCONDITION, recall_proportion, recall_type, `Practice#effect`)
+
+fig1 <- table(df_fig1$recall_type)
+barplot(fig1, main="Low Risk",
+         xlab="Retrieval Type")
+
 ```
 
 
@@ -220,7 +218,6 @@ sd(df_subset_low$`Practice#effect`)
 
 [Please include a text summary describing your findings. If this reproducibility check was a failure, you should note any suggestions as to what you think the likely cause(s) might be.]
   
-[PILOT/COPILOT ENTER RELEVANT INFORMATION BELOW]
 
 ```{r}
 Author_Assistance = FALSE # was author assistance provided? (if so, enter TRUE)

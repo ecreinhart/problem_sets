@@ -1,0 +1,2 @@
+articleID,pilotNames,copilotNames,pilotTTC,copilotTTC,pilotStartDate,copilotStartDate,completionDate,Author_Assistance,finalOutcome,Insufficient_Information_Errors,locus_typo,locus_specification,locus_analysis,locus_data,locus_unidentified,locus_typo_resolved,locus_specification_resolved,locus_analysis_resolved,locus_data_resolved,locus_unidentified_resolved
+26-10-2015,Ellen Reinhart,Griffin Dietz,330,60,1.6518004625041294e-4,1.6518004625041294e-4,NA,FALSE,Success without author assistance,0,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA
