@@ -13,10 +13,10 @@ output:
 [PILOT/COPILOT ENTER RELEVANT REPORT DETAILS HERE]
 
 ```{r}
-articleID <- 26-10-2015 # insert the article ID code here e.g., "10-3-2015_PS"
-reportType <- pilot # specify whether this is the 'pilot' report or 'final' report
-pilotNames <- Ellen Reinhart # insert the pilot's name here e.g., "Tom Hardwicke".  If there are multiple cpilots enter both names in a character string e.g., "Tom Hardwicke, Bob Dylan"
-copilotNames <- Griffin Dietz # # insert the co-pilot's name here e.g., "Michael Frank". If there are multiple co-pilots enter both names in a character string e.g., "Tom Hardwicke, Bob Dylan"
+articleID <- "26-10-2015" # insert the article ID code here e.g., "10-3-2015_PS"
+reportType <- "pilot" # specify whether this is the 'pilot' report or 'final' report
+pilotNames <- "Ellen Reinhart" # insert the pilot's name here e.g., "Tom Hardwicke".  If there are multiple cpilots enter both names in a character string e.g., "Tom Hardwicke, Bob Dylan"
+copilotNames <- "Griffin Dietz" # # insert the co-pilot's name here e.g., "Michael Frank". If there are multiple co-pilots enter both names in a character string e.g., "Tom Hardwicke, Bob Dylan"
 pilotTTC <- 180 # insert the pilot's estimated time to complete (in minutes, fine to approximate) e.g., 120
 copilotTTC <- 60 # insert the co-pilot's estimated time to complete (in minutes, fine to approximate) e.g., 120
 pilotStartDate <- 10/30/2018 # insert the pilot's start date in US format e.g., as.Date("01/25/18", format = "%m/%d/%y")
@@ -88,7 +88,7 @@ library(foreign) #read SPSS file
 char = as.character
 num = function(x) {return (as.numeric(char(x)))}
 library(psycho) #may not be needed
-
+library(sjstats)
 ```
 
 [PILOT/COPILOT DO NOT MAKE CHANGES TO THE CODE CHUNK BELOW]
@@ -131,7 +131,45 @@ df = df %>%
 ## Inferential statistics
 
 ```{r}
+#sum of squares differences in R
+
+options(contrasts=c("contr.sum","contr.poly"))
+
+
+#regression model attempts 
 summary(df_aov <- aov(recall_proportion ~ RISKCONDITION + recall_type + RISKCONDITION*recall_type + Error(`PARTICIPANT#ID`/RISKCONDITION), data = df))
+
+summary(df_aov <- aov(recall_proportion ~ RISKCONDITION*recall_type, data = df))
+
+df_aov <- aov(recall_proportion ~ RISKCONDITION*recall_type *Error(`PARTICIPANT#ID`/RISKCONDITION), data = df)
+
+posthoc = TukeyHSD(df_aov, 'recall_type', conf.level=0.95)
+
+lme_recall_prop = lme(recall_proportion ~ recall_type, data=scrd, random = ~1|Subject)
+anova(lme_recall_prop)
+
+
+#subsetting the data to understand it better 
+df_subset = df %>% 
+  select(`PARTICIPANT#ID`, RISKCONDITION, recall_proportion, recall_type) %>% 
+
+#only select if recall_type = "RPplus" | "NRP"
+df_subset_smaller = df_subset %>% filter(recall_type %in% c("NRP","RPplus"))
+
+#regression attempts again 
+summary(df_aov <- aov(recall_proportion ~ RISKCONDITION*recall_type, data = df_subset_smaller))
+
+summary(df_aov <- aov(recall_proportion ~ RISKCONDITION + recall_type + RISKCONDITION*recall_type + Error(`PARTICIPANT#ID`/RISKCONDITION), data = df_subset_smaller))
+
+#eta squared
+
+
+
+#how to write csv
+write.csv(df_subset, file = "data.csv")
+
+#and add four figures, too 
+
 ```
 
 # Step 5: Conclusion
