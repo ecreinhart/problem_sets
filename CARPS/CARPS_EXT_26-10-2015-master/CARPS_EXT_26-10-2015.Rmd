@@ -17,7 +17,7 @@ articleID <- "26-10-2015" # insert the article ID code here e.g., "10-3-2015_PS"
 reportType <- "pilot" # specify whether this is the 'pilot' report or 'final' report
 pilotNames <- "Ellen Reinhart" # insert the pilot's name here e.g., "Tom Hardwicke".  If there are multiple cpilots enter both names in a character string e.g., "Tom Hardwicke, Bob Dylan"
 copilotNames <- "Griffin Dietz" # # insert the co-pilot's name here e.g., "Michael Frank". If there are multiple co-pilots enter both names in a character string e.g., "Tom Hardwicke, Bob Dylan"
-pilotTTC <- 270 # insert the pilot's estimated time to complete (in minutes, fine to approximate) e.g., 120
+pilotTTC <- 330 # insert the pilot's estimated time to complete (in minutes, fine to approximate) e.g., 120
 copilotTTC <- 60 # insert the co-pilot's estimated time to complete (in minutes, fine to approximate) e.g., 120
 pilotStartDate <- 10/30/2018 # insert the pilot's start date in US format e.g., as.Date("01/25/18", format = "%m/%d/%y")
 copilotStartDate <- 10/30/2018 # insert the co-pilot's start date in US format e.g., as.Date("01/25/18", format = "%m/%d/%y")
@@ -89,6 +89,7 @@ char = as.character
 num = function(x) {return (as.numeric(char(x)))}
 library(psycho) #may not be needed
 library(sjstats)
+library(effsize)
 ```
 
 [PILOT/COPILOT DO NOT MAKE CHANGES TO THE CODE CHUNK BELOW]
@@ -144,8 +145,10 @@ df_subset_low = df_subset %>%
   filter(RISKCONDITION %in% c("1"))
 
 #t test 
-t.test(df_subset_low$recall_proportion ~ df_subset_low$recall_type)
+t.test(df_subset_low$recall_proportion ~ df_subset_low$recall_type, paired=TRUE)
 
+#effect size
+cohen.d(df_subset_low$recall_proportion ~ df_subset_low$recall_type)
 
 #RPplus means and SD
 df_subset_low_RPplus = df_subset_low %>% 
@@ -166,8 +169,11 @@ sd(df_subset_low_NFP$recall_proportion)
 df_subset_high = df_subset %>% 
   filter(RISKCONDITION %in% c("2"))
 
-#within subjects ANOVA ## NEED THIS STILL 
-summary(df_aov <- aov(recall_proportion ~ RISKCONDITION + recall_type + RISKCONDITION*recall_type + Error(`PARTICIPANT#ID`/RISKCONDITION), data = df_subset))
+#t test 
+t.test(df_subset_high$recall_proportion ~ df_subset_high$recall_type, paired=TRUE)
+
+#effect size
+cohen.d(df_subset_high$recall_proportion ~ df_subset_high$recall_type)
 
 #RPplus means and SD
 df_subset_high_RPplus = df_subset_high %>% 
