@@ -128,14 +128,16 @@ df = df %>%
 ```{r}
 #subsetting the data, selecting "RPplus" and "NRP" for rehersal effect
 df_subset = df %>% 
-  select(`PARTICIPANT#ID`, RISKCONDITION, recall_proportion, recall_type) %>% 
+  select(`PARTICIPANT#ID`, RISKCONDITION, recall_proportion, recall_type, `Practice#effect`) %>% 
   filter(recall_type %in% c("NRP","RPplus"))
 
 #repeated measures mixed (between and within) ANOVA
-summary(df_aov <- aov(recall_proportion ~ recall_type + RISKCONDITION + RISKCONDITION*recall_type + Error(`PARTICIPANT#ID`/RISKCONDITION), data = df_subset))
+summary(df_aov <- aov(recall_proportion ~ RISKCONDITION*recall_type + Error(`PARTICIPANT#ID`/recall_type) + recall_type, data=df_subset))
+
+#boxplot(recall_proportion ~ RISKCONDITION*recall_type,data=df_subset) #boxplot to visualize the data
 
 #eta squared calculations 
-eta_sq(df_aov)
+eta_sq(df_aov_3)
 ```
 "In exploring the main effect for retrieval type, we found a significant difference between recall of Rp+ items (M = .66, SD = .31) and recall of Nrp items (M = .52, SD = .25) in the low-risk condition, t(226) = 7.54, p < .001, d = 0.50, 95% CI for the difference between retrieval types = [.11, .19]."
 
@@ -192,6 +194,19 @@ sd(df_subset_high_NFP$recall_proportion)
 "The magnitude of the rehearsal effect was not significantly different between the high-risk (M = .13, SD = .27) and the low-risk (M = .15, SD = .30) conditions, t(458) = 0.33, p = .74, d = 0.04, 95% CI for the difference between conditions = [−.04, .07]"
 
 ```{r}
+#t test 
+t.test(df_subset$`Practice#effect` ~ df_subset$RISKCONDITION)
+
+#effect size
+cohen.d(df_subset$`Practice#effect` ~ df_subset$RISKCONDITION)
+
+#Practice effect means and SD, high risk condition 
+mean(df_subset_high$`Practice#effect`)
+sd(df_subset_high$`Practice#effect`)
+
+#Practice effect means and SD, low risk condition 
+mean(df_subset_low$`Practice#effect`)
+sd(df_subset_low$`Practice#effect`)
 
 ```
 
