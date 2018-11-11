@@ -147,21 +147,21 @@ $(document).ready(function () {
 <p>First do this using a <code>for</code> loop.</p>
 <pre class="r"><code>sig_results &lt;- 0
 
-for(i in 10:10000) {
+for(i in 1:10000) {
   p_val &lt;- t.test(rnorm(30))$p.value
   sig &lt;- p_val &lt; .05
   if(p_val &lt; .05) sig_results = sig_results + 1
 }
 
 print(sig_results)</code></pre>
-<pre><code>## [1] 484</code></pre>
+<pre><code>## [1] 454</code></pre>
 <blockquote>
 <p>Roughly 500 out of the 10,000 trials (5%) are significant.</p>
 </blockquote>
 <p>Next, do this using the <code>replicate</code> function:</p>
 <pre class="r"><code>sig_num &lt;- replicate(10000, t.test(rnorm(30))$p.value &lt; .05)
 sum(sig_num)</code></pre>
-<pre><code>## [1] 510</code></pre>
+<pre><code>## [1] 478</code></pre>
 <p>Ok, that was a bit boring. Let’s try something more interesting - let’s implement a p-value sniffing simulation, in the style of Simons, Nelson, &amp; Simonsohn (2011).</p>
 <p>Consider this scenario: you have done an experiment, again with 30 participants (one observation each, just for simplicity). The question is whether their performance is above chance. You aren’t going to check the p-value every trial, but let’s say you run 30 - then if the p-value is within the range p &lt; .25 and p &gt; .05, you optionally run 30 more and add those data, then test again. But if the original p value is &lt; .05, you call it a day, and if the original is &gt; .25, you also stop.</p>
 <p>First, write a function that implements this sampling regime.</p>
@@ -177,7 +177,7 @@ sum(sig_num)</code></pre>
 <p>Now call this function 10k times and find out what happens.</p>
 <pre class="r"><code>results &lt;- replicate(10000, double.sample() &lt; 0.05)
 sum(results)</code></pre>
-<pre><code>## [1] 738</code></pre>
+<pre><code>## [1] 695</code></pre>
 <p>Is there an inflation of false positives? How bad is it?</p>
 <blockquote>
 <p>Yes. The rate of false positives increases from ~500 to ~700, which is about a 40% increase in false positives.</p>
@@ -198,7 +198,7 @@ double.sample &lt;- function (upper){
 
 results &lt;- replicate(10000, double.sample(.1) &lt; 0.05)
 sum(results)</code></pre>
-<pre><code>## [1] 519</code></pre>
+<pre><code>## [1] 555</code></pre>
 <p>What do you conclude on the basis of this simulation? How bad is this kind of data-dependent policy?</p>
 <blockquote>
 <p>When the condition is only p &gt; .05, the sum increases to ~800, which is a 60% increase in false positive rates.When p &gt; .5, the sum is ~820, and when p &gt; .75 the sum is ~830. As the p-value threshold for increasing the sample increases, so does the false positive rate. It appears to be asymptotic, so that as the p-value threshold gets higher, the effect on the false positive rate levels off. Given that NHST operates on the condition that the false positive rate is 5%, it’s clear that a data-dependent sampling policy negates that assumption and biases data. I’m interested in hearing the teaching team’s thoughts on p &lt; .1 as marginally significant. I’ve run the simulation with the upper limit p value as .1, and the number of false positives increases to ~580, which is a 16% increase in false positives (but it’s also increasing from 5% to 5.8% chance of false positives). Data-dependent policies clearly bias data, but this also makes me think about what to make of findings that are marginal, given that there’s a higher chance that there’s a 5.8% probability of a false positive compared to less than 5% probability with the traditional p &lt; .05 cutoff.</p>

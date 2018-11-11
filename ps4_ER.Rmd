@@ -24,7 +24,7 @@ First do this using a `for` loop.
 ```{r}
 sig_results <- 0
 
-for(i in 10:10000) {
+for(i in 1:10000) {
   p_val <- t.test(rnorm(30))$p.value
   sig <- p_val < .05
   if(p_val < .05) sig_results = sig_results + 1
