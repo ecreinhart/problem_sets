@@ -7,6 +7,8 @@ output:
     toc: true
 ---
 
+>I worked with Lauren, Marianna, Julie, and Daphna on this problem set. 
+
 # Intro
 
 ```{r}
@@ -17,7 +19,7 @@ sem <- function(x) {sd(x, na.rm=TRUE) / sqrt(sum(!is.na((x))))}
 ci <- function(x) {sem(x) * 1.96} # reasonable approximation 
 ```
 
-This is problem set #4, in which we hope you will practice the visualization package `ggplot2`, as well as hone your knowledge of the packages `tidyr` and `dplyr`. You'll look at two different datasets here. 
+This is problem set #5, in which we hope you will practice the visualization package `ggplot2`, as well as hone your knowledge of the packages `tidyr` and `dplyr`. You'll look at two different datasets here. 
 
 First, data on children's looking at social targets from  Frank, Vul, Saxe (2011, Infancy).
 
@@ -38,24 +40,48 @@ fvs <- read_csv("data/FVS2011-hands.csv")
 First, use `ggplot` to plot a histogram of the ages of children in the study. NOTE: this is a repeated measures design, so you can't just take a histogram of every measurement. 
 
 ```{r}
+
+fvs_wide <- fvs %>% 
+  spread(condition,
+         hand.look
+         )
+
+ggplot(fvs_wide, aes(age)) +
+  geom_histogram(bins=30) +
+  xlab("Age (months)") +
+  ylab("Frequency")
+
 ```
 
 Second, make a scatter plot showing hand looking as a function of age and condition. Add appropriate smoothing lines. Take the time to fix the axis labels and make the plot look nice.
 
 ```{r}
+
+ggplot(fvs, aes(x=age, y=hand.look, color=condition)) +
+         geom_point() +
+  geom_smooth(method=lm, 
+              se=TRUE) +
+  xlab("Age (months)") +
+  ylab("Hand Looking") +
+  ggtitle("Handlooking As a Function of Age and Condition") +
+  theme(plot.title = element_text(hjust = .5)) +
+  scale_color_hue(labels = c("Medium Faces", "Plus Face")) +
+  scale_x_continuous(breaks = round(seq(min(fvs$age), max(fvs$age + 1), by=5))) +
+  scale_y_continuous(breaks = round(seq(min(fvs$hand.look), max(fvs$hand.look+.5), by=.05),2))
+
 ```
 
 What do you conclude from this pattern of data?
 
-> ANSWER HERE
+> There's a main effect of baby age, such that older babies spend longer looking at hands (higher hand looking time). There's also an interaction between condition and age. Older babies in the plus face condition look longer than older babies in the medium faces condition. 
 
 What statistical analyses would you perform here to quantify these differences?
 
-> ANSWER HERE
+> I'd compute a regression predicting hand looking time and include age, condition, and the age by condition interaction in the model. I'd expect age and the condition by age interaction to be significant. 
 
 # Part 2
 
-Sklar et al. (2012) claim evidence for unconscious arithmetic processing - they prime participants with arithmetic problems and claim that the authors are faster to repeat the answers. We're going to do a reanalysis of their Experiment 6, which is the primary piece of evidence for that claim. The dataare generously shared by Asael Sklar. (You may recall these data from the `tidyverse` tutorial earlier in the quarter). 
+Sklar et al. (2012) claim evidence for unconscious arithmetic processing - they prime participants with arithmetic problems and claim that the participants are faster to repeat the answers. We're going to do a reanalysis of their Experiment 6, which is the primary piece of evidence for that claim. The data are generously shared by Asael Sklar. (You may recall these data from the `tidyverse` tutorial earlier in the quarter). 
 
 ## Data Prep
 
@@ -85,11 +111,30 @@ The resulting tidy dataset should look like this:
 ```
 
 ```{r}
+
+d_a_tidy <- d_a %>% 
+  gather("subid", "rt",
+         "1":"21"
+         )
+
+d_b_tidy <- d_b %>% 
+  gather("subid", "rt",
+         "22":"42"
+         )
+
 ```
 
 Merge these with subject info. You will need to look into merge and its relatives, `left_` and `right_join`. Call this dataframe `d`, by convention. 
 
 ```{r}
+
+d_tidy = merge(d_a_tidy, d_b_tidy, all.x=T,all.y=T)
+
+d_tidy$subid=as.numeric(d_tidy$subid)
+subinfo$subid=as.numeric(subinfo$subid)
+
+d <- right_join(d_tidy, subinfo, by = "subid")
+
 ```
 
 Clean up the factor structure (just to make life easier). No need to, but if you want, you can make this more `tidyverse`-ish.
@@ -104,29 +149,45 @@ levels(d$operand) <- c("addition","subtraction")
 Examine the basic properties of the dataset. First, show a histogram of reaction times.
 
 ```{r}
+
+ggplot(d, aes(rt)) +
+  geom_histogram(bins=50) +
+  xlab("Reaction Time") +
+  ylab("Frequency")
+
+#237 NAs in the dataframe were excluded from the histogram 
+
 ```
 
 Challenge question: what is the sample rate of the input device they are using to gather RTs?
 
-> ANSWER HERE (OPTIONAL)
+> I'm not sure how to calculate this with R. We think the sample rate is how often the tool measures RT. 
 
 Sklar et al. did two manipulation checks. Subjective - asking participants whether they saw the primes - and objective - asking them to report the parity of the primes (even or odd) to find out if they could actually read the primes when they tried. Examine both the unconscious and conscious manipulation checks. What do you see? Are they related to one another?
 
 ```{r}
+
+cor.test(d$subjective.test,d$objective.test)
+
 ```
 
-> ANSWER HERE
+> Subjective and objective manipulation checks are correlated: r=.579. People's subjective report isn't 100% accurate (otherwise r=1), but it's a significnat positive correlation between subjective and objective ratings. 
 
 In Experiments 6, 7, and 9, we used the binomial distribution to determine whether each participant performed better than chance on the objective block and excluded from analyses all those participants who did (21, 30, and 7 participants in Experiments 6, 7, and 9, respectively). Note that, although the number of excluded participants may seem high, they fall within the normal range of long-duration CFS priming, in which successful suppression is strongly affected by individual differences (38). We additionally excluded participants who reported any subjective awareness of the primes (four, five, and three participants in Experiments 6, 7, and 9, respectively).
  
 OK, let's turn back to the measure and implement Sklar et al.'s exclusion criterion. You need to have said you couldn't see (subjective test) and also be not significantly above chance on the objective test (< .6 correct). Call your new data frame `ds`.
 
 ```{r}
+
+ds <- d %>% 
+  filter(subjective.test == 0,
+         objective.test < .6)
+
 ```
 
 ## Replicating Sklar et al.'s analysis
 
-![sklar_et_al_2012_facilitation_effect](img/sklar_et_al_2012_facilitation_effect.jpg)
+![sklar_et_al_2012_facilitation_effect](../problem_sets/img/sklar_et_al_2012_facilitation_effect.jpg)
 
 Sklar et al. show a plot of a "facilitation effect" - the amount faster you are for prime-congruent naming compared with prime-incongruent naming. They then show plot this difference score for the subtraction condition and for the two prime times they tested. Try to reproduce this analysis. 
 
@@ -137,14 +198,46 @@ HINT 2: remember that in class, we reviewed the common need to `group_by` and `s
 HINT 3: The final summary dataset should have 4 rows and 5 columns (2 columns for the two conditions and 3 columns for the outcome: reaction time, ci, and n).
 
 ```{r}
+  
+ds_avg <- ds %>%
+  group_by(subid,congruent,presentation.time) %>% 
+  summarize(rt_avg = mean(rt, na.rm = TRUE)) %>% 
+  group_by(congruent,presentation.time) %>% 
+  summarize(rt_avg_all = mean(rt_avg, na.rm=TRUE),
+            ci=ci(rt_avg),
+            n=n())
+
 ```
 
 Now plot this summary, giving more or less the bar plot that Sklar et al. gave (though I would keep operation as a variable here. Make sure you get some error bars on there (e.g. `geom_errorbar` or `geom_linerange`). 
 
 ```{r}
+
+ds_plot <- ds %>% 
+  filter(operand == "S") %>% 
+  group_by(subid,congruent,presentation.time) %>% 
+  summarize(rt = mean(rt, na.rm = TRUE)) %>% 
+  spread(congruent,rt) %>% 
+  mutate(diff = no - yes) %>% 
+  group_by(presentation.time) %>% 
+  summarize(diff_all = mean(diff),
+            ci=ci(diff),
+            n=n())
+
+ggplot(ds_plot, aes(x=presentation.time, y=diff_all)) +
+  geom_bar(position="dodge", stat="identity") +
+  geom_errorbar(aes(ymin = diff_all - ci, 
+                    ymax = diff_all + ci), 
+                    width=.2,
+                    position=position_dodge(.9)) +
+  ylab("Facilitation (ms)") +
+  xlab("Presentation time") +
+  ggtitle("Reproduction of Skylar et al.") +
+  theme(plot.title=element_text(hjust=.5))
+
 ```
 
 What do you see here? How close is it to what Sklar et al. report? How do you interpret these data? 
 
-> ANSWER
+> The difference scores are the same in our reproduction. However, the error bars in the original study are much narrower. The reproduced error bars are so wide that they overlap (a lot), which suggests the difference in presentation time is not significnat. 
 
